@@ -54,10 +54,13 @@ def continue_conversation(message_json):
         function_name = response_message["function_call"]["name"]
         fuction_to_call = available_functions[function_name]
         function_args = json.loads(response_message["function_call"]["arguments"])
-        function_response = fuction_to_call(
+        try:
+            function_response = fuction_to_call(
                 function_args.get("direction"),
                 function_args.get("amount")
                 )
+        except:
+            function_response = "Could not execute function call"
         conversation.append(response_message)
         conversation.append(
                 {
