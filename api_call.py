@@ -31,9 +31,11 @@ functions = [
 def start_conversation(message):
     global conversation
     conversation = start_conversation
-    conversation.append({ "role" : "user", "content" : message}) 
+    return continue_conversation({ "role" : "user", "content" : message})
+    
 def continue_conversation(message_json):
     global conversation
+    conversation.pop(1)
     conversation.append(message_json)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0613",
@@ -65,7 +67,8 @@ def continue_conversation(message_json):
             messages=conversation,
         )  # get a new response from GPT where it can see the function response
         continue_conversation(second_response)
+    return response_message
 def userinput(input):
     input = {"role":"user","content":input}
-    continue_conversation(input)
+    return continue_conversation(input)
 
