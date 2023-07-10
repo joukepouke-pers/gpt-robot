@@ -1,2 +1,2 @@
 def move():
-    return "moved successfully"
+    return "motor error!"

@@ -61,7 +61,8 @@ def continue_conversation(message_json):
                 )
         except:
             function_response = "Could not execute function call"
-        conversation.append(response_message)
+        print(response["choices"][0])
+        conversation.append(response["choices"][0]["message"])
         conversation.append(
                 {
                 "role": "function",
@@ -72,7 +73,8 @@ def continue_conversation(message_json):
             model="gpt-3.5-turbo-0613",
             messages=conversation,
         )  # get a new response from GPT where it can see the function response
-        continue_conversation(second_response)
+        print(second_response["choices"][0]["message"]["content"])
+        continue_conversation(second_response["choices"][0]["message"])
     return response_message
 def userinput(input):
     input = {"role":"user","content":input}
