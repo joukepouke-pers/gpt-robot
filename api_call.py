@@ -5,7 +5,7 @@ openai.api_key_path = "openai_api_key"
 default_conversation = [
         {
             "role" : "system",
-            "content" : 'you are a language model made by openai wich is intergrated into a voice assistant. give short responses. only call functions provided to you.'
+            "content" : 'you are a robot that can move. give short responses. only call functions provided to you.'
             }
         ]
 functions = [
@@ -33,26 +33,36 @@ def start_conversation(message):
     conversation = default_conversation
     return continue_conversation({ "role" : "user", "content" : message})
     
-def continue_conversation(message_json):
+def continue_conversation(message_json, function=True):
     global conversation
     try:
         conversation.pop(1)
     except:
         pass
     conversation.append(message_json)
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=conversation,
-        functions=functions,
-        function_call="auto",  # auto is default, but we'll be explicit
-    )
+    if function:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0613",
+            messages=conversation,
+            functions=functions,
+            function_call="auto",  # auto is default, but we'll be explicit
+        )
+    else:
+        response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo-0613",
+                messages=conversation,
+                functions=functions,
+                function_call="none")
     response_message = response["choices"][0]["message"]
     if response_message.get("function_call"):
         available_functions = {
                 "move" : gpt_functions.move
                 }
         function_name = response_message["function_call"]["name"]
-        fuction_to_call = available_functions[function_name]
+        try:
+            fuction_to_call = available_functions[function_name]
+        except:
+            function_to_call = lambda : "sorry, that function does not exist" 
         function_args = json.loads(response_message["function_call"]["arguments"])
         try:
             function_response = fuction_to_call(
@@ -61,7 +71,6 @@ def continue_conversation(message_json):
                 )
         except:
             function_response = "Could not execute function call"
-        print(response["choices"][0])
         conversation.append(response["choices"][0]["message"])
         conversation.append(
                 {
@@ -74,7 +83,7 @@ def continue_conversation(message_json):
             messages=conversation,
         )  # get a new response from GPT where it can see the function response
         print(second_response["choices"][0]["message"]["content"])
-        continue_conversation(second_response["choices"][0]["message"])
+        conversation.append(second_response["choices"][0]["message"])
     return response_message
 def userinput(input):
     input = {"role":"user","content":input}
