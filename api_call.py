@@ -17,14 +17,14 @@ functions = [
             "properties" : {
                 "direction" : {
                     "type" : "integer",
-                    "description" : "either forward(1) or backward(0)"
+                    "description" : "either forward(1) or backward(0) or rotate left(2) or right(3)"
                     },
-                "amount" : {
+                "seconds" : {
                     "type" : "integer",
-                    "description" : "amount of centimeters to move"
+                    "description" : "amount of seconds to move"
                     },
                 },
-            "required" : ["direction", "amount"]
+            "required" : ["direction", "seconds"]
          }
 }
 ]
@@ -66,8 +66,8 @@ def continue_conversation(message_json, function=True):
         function_args = json.loads(response_message["function_call"]["arguments"])
         try:
             function_response = fuction_to_call(
-                function_args.get("direction"),
-                function_args.get("amount")
+                function_args.get("seconds"),
+                function_args.get("direction")
                 )
         except:
             function_response = "Could not execute function call"
